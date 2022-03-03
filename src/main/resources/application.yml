@@ -1,0 +1,7 @@
+spring:
+  mqtt:
+    server-url: tcp://127.0.0.1:1883
+    client-id: rain-smart-server-${random.value}
+    username: admin
+    password: public
+    default-topic: test
