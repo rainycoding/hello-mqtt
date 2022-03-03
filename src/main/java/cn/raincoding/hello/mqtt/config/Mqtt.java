@@ -1,5 +1,6 @@
 package cn.raincoding.hello.mqtt.config;
 
+import cn.raincoding.hello.mqtt.util.JsonUtils;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -19,5 +20,12 @@ public class Mqtt<T> implements Serializable {
     private int qos;
 
     private T payload;
+
+    public String getPayloadJsonStr() {
+        if (payload instanceof String) {
+            return (String) payload;
+        }
+        return JsonUtils.obj2json(payload);
+    }
 
 }
