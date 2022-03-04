@@ -15,12 +15,31 @@ import java.io.Serializable;
 public class Mqtt<T> implements Serializable {
     private static final long serialVersionUID = 1L;
 
+    /**
+     * Mqtt Topic
+     */
     private String topic;
 
-    private int qos;
+    /**
+     * Mqtt QoS
+     */
+    private int qos = 1;
 
+    /**
+     * Mqtt Retained
+     */
+    private boolean retained = true;
+
+    /**
+     * Mqtt Payload
+     */
     private T payload;
 
+    /**
+     * 获取 Payload Json 字符串
+     *
+     * @return Payload Json String
+     */
     public String getPayloadJsonStr() {
         if (payload instanceof String) {
             return (String) payload;

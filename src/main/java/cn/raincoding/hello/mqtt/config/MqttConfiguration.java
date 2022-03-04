@@ -2,7 +2,9 @@ package cn.raincoding.hello.mqtt.config;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
+import org.eclipse.paho.client.mqttv3.MqttException;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -46,52 +48,22 @@ public class MqttConfiguration {
     private int keepAlive = 100;
 
     @Bean
-    public MqttPahoClientFactory mqttClientFactory() {
-        DefaultMqttPahoClientFactory mqttClientFactory = new DefaultMqttPahoClientFactory();
-        MqttConnectOptions options = new MqttConnectOptions();
-        options.setServerURIs(new String[] {serverUrl});
-        options.setUserName(username);
-        options.setPassword(password.toCharArray());
-        options.setConnectionTimeout(timeout);
-        options.setKeepAliveInterval(keepAlive);
-        options.setAutomaticReconnect(true);
-        mqttClientFactory.setConnectionOptions(options);
-        return mqttClientFactory;
+    public MqttConnectOptions mqttConnectOptions() {
+        MqttConnectOptions mqttOptions = new MqttConnectOptions();
+        mqttOptions.setServerURIs(new String[] {serverUrl});
+        mqttOptions.setUserName(username);
+        mqttOptions.setPassword(password.toCharArray());
+        mqttOptions.setConnectionTimeout(timeout);
+        mqttOptions.setKeepAliveInterval(keepAlive);
+        mqttOptions.setAutomaticReconnect(true);
+        return mqttOptions;
     }
 
     @Bean
-    @ServiceActivator(inputChannel = "mqttOutboundChannel")
-    public MessageHandler mqttOutbound(MqttPahoClientFactory mqttClientFactory) {
-        MqttPahoMessageHandler messageHandler = new MqttPahoMessageHandler(clientId, mqttClientFactory);
-        messageHandler.setAsync(true);
-        messageHandler.setDefaultTopic(defaultTopic);
-        return messageHandler;
-    }
-
-    @Bean
-    public MessageChannel mqttOutboundChannel() {
-        return new DirectChannel();
-    }
-
-    @Bean
-    public MessageProducer mqttInbound(MessageChannel mqttInboundChannel) {
-        MqttPahoMessageDrivenChannelAdapter adapter = new MqttPahoMessageDrivenChannelAdapter(serverUrl, "test", "testtopic/#");
-        adapter.setCompletionTimeout(5000);
-        adapter.setConverter(new DefaultPahoMessageConverter());
-        adapter.setQos(1);
-        adapter.setOutputChannel(mqttInboundChannel);
-        return adapter;
-    }
-
-    @Bean
-    @ServiceActivator(inputChannel = "mqttInboundChannel")
-    public MessageHandler handler() {
-        return message -> System.out.println(message.getPayload());
-    }
-
-    @Bean
-    public MessageChannel mqttInboundChannel() {
-        return new DirectChannel();
+    public MqttClient mqttClient(MqttConnectOptions mqttConnectOptions) throws MqttException {
+        MqttClient mqttClient = new MqttClient(mqttConnectOptions.getServerURIs()[0], clientId);
+        mqttClient.connect(mqttConnectOptions);
+        return mqttClient;
     }
 
 }

@@ -1,3 +1,5 @@
 .idea
+logs
+rain-smart-server-*
 target
 hello-mqtt.iml
